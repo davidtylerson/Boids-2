@@ -34,13 +34,13 @@ importers:
         version: 2.1.4
     devDependencies:
       autoprefixer:
-        specifier: ^10.4.14
+        specifier: ^10.4.20
         version: 10.4.20(postcss@8.5.3)
       postcss:
-        specifier: ^8.4.24
+        specifier: ^8.5.3
         version: 8.5.3
       tailwindcss:
-        specifier: ^3.3.2
+        specifier: ^3.4.17
         version: 3.4.17
 
 packages:

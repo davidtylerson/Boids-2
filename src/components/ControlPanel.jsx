@@ -14,7 +14,7 @@ const ControlPanel = ({
       <div className="text-lg font-bold mb-3 text-white">Simulation Controls</div>
       
       <div className="mb-3">
-        <label className="block mb-1 text-sm !text-white">Boid Count: {boidCount}</label>
+        <label className="block mb-1 text-sm text-white">Boid Count: {boidCount}</label>
         <input 
           type="range" 
           min="100" 
