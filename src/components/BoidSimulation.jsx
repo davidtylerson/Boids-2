@@ -421,13 +421,17 @@ const BoidSimulation = ({ boidCount, speedMultiplier, mouseAvoidance }) => {
         this._mousePos2D.set(mouseWorldCoordinates.x, mouseWorldCoordinates.y, this.position.z);
         const distToMouse = this.position.distanceTo(this._mousePos2D);
         
-        // Only avoid if within avoidance radius
-        if (distToMouse < params.mouseAvoidanceRadius) {
+        // CHANGE: Adjust avoidance radius based on aspect ratio
+        const adjustedRadius = params.mouseAvoidanceRadius * 
+          (window.innerWidth > window.innerHeight ? 1 : window.innerWidth/window.innerHeight);
+        
+        // Only avoid if within avoidance radius (use adjusted radius)
+        if (distToMouse < adjustedRadius) {
           // Calculate avoidance direction (away from mouse)
           this._avoidDir.subVectors(this.position, this._mousePos2D).normalize();
           
           // Stronger avoidance when closer to mouse (inverse square falloff)
-          const strength = (1 - (distToMouse / params.mouseAvoidanceRadius)) ** 2;
+          const strength = (1 - (distToMouse / adjustedRadius)) ** 2;
           
           // Create avoidance force - using the direct parameter value
           const avoidanceStrength = params.mouseAvoidanceStrength * params.maxForce * 2;
@@ -604,18 +608,21 @@ const BoidSimulation = ({ boidCount, speedMultiplier, mouseAvoidance }) => {
       // Handle world boundaries (wrap around)
       wrapPosition() {
         const pos = this.position;
-        const limit = params.worldSize;
+        const baseLimit = params.worldSize;
         
-        if (pos.x > limit) pos.x = -limit;
-        else if (pos.x < -limit) pos.x = limit;
+        // Adjust X boundary based on aspect ratio
+        const xLimit = baseLimit * camera.aspect;
         
-        if (pos.y > limit) pos.y = -limit;
-        else if (pos.y < -limit) pos.y = limit;
+        // Use aspect-adjusted limits
+        if (pos.x > xLimit) pos.x = -xLimit;
+        else if (pos.x < -xLimit) pos.x = xLimit;
         
-        if (pos.z > limit * 0.5) pos.z = -limit * 0.5;
-        else if (pos.z < -limit * 0.5) pos.z = limit * 0.5;
+        if (pos.y > baseLimit) pos.y = -baseLimit;
+        else if (pos.y < -baseLimit) pos.y = baseLimit;
+        
+        if (pos.z > baseLimit * 0.5) pos.z = -baseLimit * 0.5;
+        else if (pos.z < -baseLimit * 0.5) pos.z = baseLimit * 0.5;
       }
-      
       // Update boid position and appearance
       update() {
         // Update velocity
@@ -684,6 +691,11 @@ const BoidSimulation = ({ boidCount, speedMultiplier, mouseAvoidance }) => {
         1 + Math.floor(Math.random() * 2)
       );
       
+      // Calculate aspect-adjusted X limit
+      const xLimit = params.worldSize * camera.aspect * 0.7;
+      const yLimit = params.worldSize * 0.7;
+      const zLimit = params.worldSize * 0.3;
+      
       // First try to reuse inactive centers
       const inactiveCenters = waveCenters.filter(c => !c.active);
       
@@ -692,9 +704,9 @@ const BoidSimulation = ({ boidCount, speedMultiplier, mouseAvoidance }) => {
           // Reuse an inactive center
           const center = inactiveCenters[i];
           center.position.set(
-            (Math.random() * 2 - 1) * params.worldSize * 0.7,
-            (Math.random() * 2 - 1) * params.worldSize * 0.7,
-            (Math.random() * 2 - 1) * params.worldSize * 0.3
+            (Math.random() * 2 - 1) * xLimit,  // X position uses aspect-adjusted limit
+            (Math.random() * 2 - 1) * yLimit,
+            (Math.random() * 2 - 1) * zLimit
           );
           center.radius = 30 + Math.random() * 40;
           center.strength = 0.5 + Math.random() * 0.5;
@@ -705,9 +717,9 @@ const BoidSimulation = ({ boidCount, speedMultiplier, mouseAvoidance }) => {
           // Create a new center if needed
           waveCenters.push({
             position: new THREE.Vector3(
-              (Math.random() * 2 - 1) * params.worldSize * 0.7,
-              (Math.random() * 2 - 1) * params.worldSize * 0.7,
-              (Math.random() * 2 - 1) * params.worldSize * 0.3
+              (Math.random() * 2 - 1) * xLimit,  // X position uses aspect-adjusted limit
+              (Math.random() * 2 - 1) * yLimit,
+              (Math.random() * 2 - 1) * zLimit
             ),
             radius: 30 + Math.random() * 40,
             strength: 0.5 + Math.random() * 0.5,
